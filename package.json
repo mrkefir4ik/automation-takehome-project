@@ -1,0 +1,21 @@
+{
+  "name": "automation-takehome-project",
+  "version": "1.0.0",
+  "description": "Project for candidates to complete as a hiring assessment.",
+  "main": "index.ts",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrkefir4ik/automation-takehome-project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mrkefir4ik/automation-takehome-project/issues"
+  },
+  "homepage": "https://github.com/mrkefir4ik/automation-takehome-project#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.35.1",
+    "typescript": "^5.1.6"
+  }
+}
