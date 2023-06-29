@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Project for candidates to complete as a hiring assessment.",
   "main": "index.ts",
-  "scripts": {},
+  "scripts": {
+    "search": "npx ts-node index.ts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mrkefir4ik/automation-takehome-project.git"
