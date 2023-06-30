@@ -9,7 +9,7 @@ interface Product {
   link: string;
 }
 
-async function scrapeEcommercePrices(
+async function scrapePricesFromPage(
   siteUrl: string,
   searchTerm: string
 ): Promise<Product[]> {
@@ -28,22 +28,32 @@ async function scrapeEcommercePrices(
   page.click('.nav-search-submit [type="submit"]');
 
   // Wait for the results to load
-  await page.waitForSelector(".s-result-list");
+  await page.waitForSelector(".s-product-image-container", {
+    state: "visible",
+  });
 
-  // Sort the results by price (low to high)
-  await page.selectOption("#s-result-sort-select", "price-asc-rank");
+  await page.waitForTimeout(1000);
+  // Change the sort by option to "Price: Low to High"
+  const sortBySelect = await page.waitForSelector("#s-result-sort-select", {
+    state: "visible",
+  });
+  await sortBySelect.selectOption("price-asc-rank");
 
   // Wait for the sorted results to load
-  await page.waitForSelector(".s-result-list");
+  await page.waitForSelector(".s-product-image-container", {
+    state: "visible",
+  });
 
+  await page.waitForTimeout(1000);
   // Find the products
   const products: Product[] = await page.evaluate((searchTerm: string) => {
     const results: Product[] = [];
 
-    const productElements = window.document.querySelectorAll(".s-result-item");
+    const productElements =
+      window.document.querySelectorAll(".s-card-container");
     for (const element of productElements) {
       const nameElement = element.querySelector("h2 a span");
-      const priceElement = element.querySelector(".a-price span");
+      const priceElement = element.querySelector(".a-price .a-offscreen");
       const linkElement = element.querySelector("h2 a");
 
       if (nameElement && priceElement && linkElement) {
@@ -73,7 +83,8 @@ async function writeProductsToCSV(products: Product[]): Promise<void> {
 
   products.forEach((product) => {
     const { name, price, searchTerm, link } = product;
-    const csvRow = `${name},${price},${searchTerm},${link}`;
+    const csvName = name.replace(/"/g, '""');
+    const csvRow = `"${csvName}",${price},"${searchTerm}",${link}`;
     csvRows.push(csvRow);
   });
 
@@ -90,8 +101,28 @@ console.log(
 // Define URL
 const siteUrl = "https://www.amazon.com";
 
-// Scrape prices and write to CSV
-scrapeEcommercePrices(siteUrl, searchTerm)
+async function scrapeWithRetry(
+  siteUrl: string,
+  searchTerm: string,
+  maxRetries: number = 3
+): Promise<Product[]> {
+  let retryCount = 0;
+  while (retryCount < maxRetries) {
+    try {
+      const products = await scrapePricesFromPage(siteUrl, searchTerm);
+      if (products.length < 3)
+        throw new Error("Page could not load. Trying again...");
+      return products;
+    } catch (error) {
+      console.error(`Scraping failed (Attempt ${retryCount + 1}):`, error);
+      retryCount++;
+    }
+  }
+  throw new Error(`Scraping failed after ${maxRetries} attempts.`);
+}
+
+// Usage:
+scrapeWithRetry(siteUrl, searchTerm)
   .then((products) => writeProductsToCSV(products))
   .then(() => console.log("CSV file has been written successfully."))
   .catch((error) => console.error("An error occurred:", error));
