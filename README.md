@@ -23,3 +23,10 @@ The objective is to build an automation application, meaning a program that perf
 ### Extra Credit
 
 1. Introduce a set of tests around the project
+
+---
+
+#### HOW TO RUN
+
+To run the query use `npm run search "[YOUR ITEM]"`.
+For example: `npm run search "vr"`
