@@ -1,4 +1,4 @@
-import { writeProductsToCSV, Product } from "./../helpers";
+import { writeProductsToCSV, Product } from "../helpers";
 import * as fs from "fs";
 
 jest.mock("fs", () => ({

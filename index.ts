@@ -1,6 +1,6 @@
 import { scrapeWithRetry, writeProductsToCSV } from "./helpers";
 
-// Get the search term from the command-line argument
+// Get the search term from the CLI argument
 const searchTerm = process.argv[2];
 console.log(
   "Searching for 3 cheapest items with name: " + process.argv[2].toUpperCase()

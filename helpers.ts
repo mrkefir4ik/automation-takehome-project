@@ -16,13 +16,12 @@ export async function scrapePricesFromPage(
   const browser: Browser = await chromium.launch();
   const page: Page = await browser.newPage();
 
-  // Navigate to the e-commerce site
   await page.goto(siteUrl);
 
   // Wait for the search box to be visible and enabled
   await page.waitForSelector("#twotabsearchtextbox", { state: "visible" });
 
-  // Search for the provided term
+  // Search for the provided keyword
   await page.fill("#twotabsearchtextbox", searchTerm);
 
   page.click('.nav-search-submit [type="submit"]');
@@ -31,7 +30,7 @@ export async function scrapePricesFromPage(
   await page.waitForSelector(".s-product-image-container", {
     state: "visible",
   });
-
+  // Wait for all the content to load
   await page.waitForTimeout(1000);
   // Change the sort by option to "Price: Low to High"
   const sortBySelect = await page.waitForSelector("#s-result-sort-select", {
@@ -45,7 +44,8 @@ export async function scrapePricesFromPage(
   });
 
   await page.waitForTimeout(1000);
-  // Find the products
+
+  // Gather the products
   const products: Product[] = await page.evaluate((searchTerm: string) => {
     const results: Product[] = [];
 
@@ -70,7 +70,7 @@ export async function scrapePricesFromPage(
 
   await browser.close();
 
-  // Sort the products by price in ascending order
+  // Sort the products by price from low to high
   products.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
 
   // Return the three lowest priced products
@@ -88,10 +88,14 @@ export async function writeProductsToCSV(products: Product[]): Promise<void> {
     csvRows.push(csvRow);
   });
 
+  //Separate products
   const csvContent = csvRows.join("\n");
+
+  //Write to file
   await fs.promises.writeFile("ecommerce_prices.csv", csvContent);
 }
 
+//Sometimes playwright fails to load the page's content. In this case we try again
 export async function scrapeWithRetry(
   siteUrl: string,
   searchTerm: string,

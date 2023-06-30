@@ -30,3 +30,7 @@ The objective is to build an automation application, meaning a program that perf
 
 To run the query use `npm run search "[YOUR ITEM]"`.
 For example: `npm run search "vr"`
+
+#### HOW TO RUN TESTS
+
+`npm test`
